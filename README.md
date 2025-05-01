@@ -1,44 +1,37 @@
 # 🚀 HyperT-B
-
 Smart, Multi-functional, Multilingual Telegram Bot
 
-HyperT-B is an advanced and scalable Telegram bot designed to deliver a wide range of powerful features for modern users. It supports multiple languages and is built for a global audience. The bot focuses on simplicity, speed, and functionality, offering essential tools that cover media downloading, AI interaction, file management, and more — all inside Telegram.
-# 🔧 Key Features
+## 🔧 Key Features
 
-##    🎥 YouTube Video Downloader
-Users can download YouTube videos instantly by simply sending a video link. The bot supports multiple formats and qualities, providing fast and reliable downloads.
+### 🎥 1. YouTube Video Downloader
+Users can download YouTube videos instantly by sending a video link. The bot supports multiple formats and qualities.
 
-##    🤖 AI Chat Assistant
-Integrated with advanced natural language models, HyperT-B includes a smart chatbot capable of answering questions, having casual conversations, and assisting users with intelligent responses.
+### 🤖 2. AI Chat Assistant
+An intelligent chatbot powered by language models that responds smartly to user queries and conversations.
 
-##    🎵 SoundCloud Music Downloader
-Just send a SoundCloud link, and the bot will download and deliver the audio file directly to your chat — fast, clean, and high-quality.
+### 🎵 3. SoundCloud Music Downloader
+Download any track by sending its SoundCloud link. The bot fetches and delivers it directly.
 
-##    🔍 Search & Download Music by Name
-Users can search for songs by name across platforms like YouTube and SoundCloud. The bot will find, select, and deliver the best match to the user.
+### 🔍 4. Music Search & Download
+Search music by name across YouTube and SoundCloud. Automatically finds and sends the best result.
 
-##    💳 Crypto Wallet Recharge
-Users can top up their virtual wallet inside the bot using popular cryptocurrencies (e.g., USDT, BTC, ETH). This wallet can later be used to access premium features.
+### 💳 5. Crypto Wallet Recharge
+Recharge your bot wallet using cryptocurrencies (USDT, BTC, etc.) to unlock premium features.
 
-##    🖼️ Image Scanning & Document Conversion
-Send a photo of handwritten notes, book pages, or documents — and the bot will scan, enhance, and convert it into a clean, readable digital document using smart filters.
+### 🖼️ 6. Document Scanner
+Send images of handwritten or printed notes, and the bot will process them into clean documents with effects.
 
-##    ☁️ User-Specific Cloud Storage
-Each user gets a private storage space inside the bot to save downloaded or uploaded files. They can retrieve and manage their files anytime.
+### ☁️ 7. User Cloud Storage
+Each user gets personal storage for files and downloads accessible anytime.
 
-# 🌍 Built for Everyone
+## 🌍 Multilingual Support
+The bot automatically adapts to the user's language for a seamless global experience.
 
-HyperT-B is designed as a multilingual platform, allowing users from any country to interact with the bot in their native language. The UI adapts automatically based on the user's preferences.
-🧠 Future Plans
+## 🧠 Future Plans
+- Affiliate marketing system  
+- Integration with more platforms  
+- Smarter AI tools  
+- Premium subscription access
 
-## Additional upcoming features include:
-
-###    Affiliate marketing tools
-
-###    Integration with external platforms
-
-###    Advanced media tools
-
-###    More AI-powered services
-
-###    Premium subscription plans
+## 📌 License & Contribution
+Open for collaboration and suggestions. Contributions are welcome!
