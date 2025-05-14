@@ -88,13 +88,19 @@ if not proxy_status:
     print("Cannot start bot - no working proxy available!")
     exit()
 
+bot_info_file_path = os.path.join(os.path.dirname(__file__), "BotInfo.json")
+with open(bot_info_file_path, "r", encoding="utf-8") as f:
+    deserialized_data = json.load(f)
+    api_id = deserialized_data["api_id"]
+    api_hash = deserialized_data["api_hash"]
+
 # Basic echo bot that replies to messages
 bot = Client(
     "my_bot",
-    api_id=123456,  # Replace with your API ID
-    api_hash="your_api_hash_here",  # Replace with your API hash
+    api_id=api_id,  # Replace with your API ID
+    api_hash=api_hash,  # Replace with your API hash
     proxy=proxy_config,  # Using our tested proxy
-    plugins=dict(root="plugins"),  # Optional plugins directory
+    # plugins=dict(root="plugins"),  # Optional plugins directory
 )
 
 
