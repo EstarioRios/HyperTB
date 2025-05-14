@@ -1,0 +1,37 @@
+[
+    {
+        "hostName": "204.76.203.25",
+        "port": 443,
+        "secret": "15115115115115115115115115115115"
+    },
+    {
+        "hostName": "65.21.213.224",
+        "port": 443,
+        "secret": "ee1603010200010001fc030386e24c3add726161682e6972"
+    },
+    {
+        "hostName": "14.102.10.176",
+        "port": 8443,
+        "secret": "eeNEgYdJvXrFGRMCIMJdCQ"
+    },
+    {
+        "hostName": "65.21.213.224",
+        "port": 443,
+        "secret": "ee1603010200010001fc030386e24c3add726161682e6972"
+    },
+    {
+        "hostName": "ir.rezerviha.ir.",
+        "port": 551,
+        "secret": "eeNEgYdJvXrFGRMCIMJdCQ"
+    },
+    {
+        "hostName": "14.102.10.177",
+        "port": 8443,
+        "secret": "eeNEgYdJvXrFGRMCIMJdCQ"
+    },
+    {
+        "hostName": "14.102.10.171",
+        "port": 8443,
+        "secret": "eeNEgYdJvXrFGRMCIMJdCQ"
+    }
+]

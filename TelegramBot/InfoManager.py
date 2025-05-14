@@ -4,39 +4,68 @@ import json
 
 def addProxy(hostName, port, secret):
     """
-    Adds a new proxy configuration to a JSON file.
+    Safely adds a new proxy configuration to proxies.json with full error handling.
 
     Args:
-        hostName (str): The hostname or IP address of the proxy
-        port (int): The port number of the proxy
-        secret (str): The secret/key for the proxy authentication
+        hostName (str): Proxy hostname/IP
+        port (int/str): Proxy port number
+        secret (str): Proxy secret key
+
+    Returns:
+        bool: True if successful, False if failed
     """
+    try:
+        # Validate input parameters
+        if not all([hostName, port, secret]):
+            raise ValueError("All proxy parameters are required")
 
-    # Create a dictionary with the proxy data
-    inputed_data = {"hostName": hostName, "port": port, "secret": secret}
+        # Convert port to integer
+        try:
+            port = int(port)
+        except ValueError:
+            raise ValueError("Port must be a valid number")
 
-    # Construct the full file path for proxies.json in the same directory as this script
-    file_path = os.path.join(os.path.dirname(__file__), "proxies.json")
+        # Prepare proxy data
+        proxy_data = {
+            "hostName": hostName.strip(),
+            "port": port,
+            "secret": secret.strip(),
+        }
 
-    # If the JSON file doesn't exist, create it with an empty list
-    if not os.path.exists(file_path):
+        # Determine file path
+        file_path = os.path.join(os.path.dirname(__file__), "proxies.json")
+
+        # Initialize empty list if file doesn't exist
+        if not os.path.exists(file_path):
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump([], f, ensure_ascii=False, indent=4)
+                current_data = []
+        else:
+            # Safely read existing data (handles empty/corrupt files)
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    current_data = json.load(f)
+                    if not isinstance(current_data, list):
+                        current_data = []  # Reset if not a list
+            except (json.JSONDecodeError, ValueError):
+                current_data = []  # Reset if corrupted
+
+        # Add new proxy
+        current_data.append(proxy_data)
+
+        # Write back to file
         with open(file_path, "w", encoding="utf-8") as f:
-            json.dump([], f, ensure_ascii=False, indent=4)
+            json.dump(current_data, f, ensure_ascii=False, indent=4)
 
-    # Read the existing data from the JSON file
-    with open(file_path, "r", encoding="utf-8") as f:
-        loaded_data = json.load(f)
+        print(f"✅ Proxy {hostName}:{port} added successfully.")
+        return True
 
-    # Add the new proxy data to the existing list
-    loaded_data.append(inputed_data)
-
-    # Write the updated data back to the JSON file
-    with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(loaded_data, f, ensure_ascii=False, indent=4)
-        print("Proxy added.")
+    except Exception as e:
+        print(f"❌ Failed to add proxy: {str(e)}")
+        return False
 
 
-def subBotInfo(api_id, api_hash):
+def subBotInfo(token):
     """
     Saves bot API credentials to a JSON file.
 
@@ -48,7 +77,7 @@ def subBotInfo(api_id, api_hash):
 
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(
-            {"api_id": api_id, "api_hash": api_hash},
+            {"token": token},
             f,  # You were missing the file object here
             ensure_ascii=False,
             indent=4,
@@ -66,8 +95,7 @@ def showBotInfo():
         with open(file_path, "r", encoding="utf-8") as f:
             deserialized_data = json.load(f)
             print("Bot Information:")
-            print(f"API ID: {deserialized_data['api_id']}")
-            print(f"API Hash: {deserialized_data['api_hash']}")
+            print(f"Bot Token: {deserialized_data["token"]}")
 
     except FileNotFoundError:
         print("Error: BotInfo.json file not found!")
@@ -77,6 +105,7 @@ def showBotInfo():
 
 while True:
     # Print main menu header
+    print("=================================================")
     print("Hello wich of these do you wannt do?")
 
     # Get user choice for operation
@@ -102,14 +131,10 @@ while True:
     elif q1 == "2":
         print("=================================================")
 
-        # Get Telegram API credentials from user
-        api_id = input("Write the 'Api-ID': ")  # Telegram API ID (from my.telegram.org)
-        api_hash = input(
-            "Write the 'Api-Hash': "
-        )  # Telegram API hash (from my.telegram.org)
+        token = input("Write the 'Bot Token: '")
 
         # Save the API credentials to file
-        subBotInfo(api_id=api_id, api_hash=api_hash)
+        subBotInfo(token=token)
 
     # Option 3: View saved bot information
     elif q1 == "3":
