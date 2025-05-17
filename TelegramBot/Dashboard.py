@@ -121,15 +121,15 @@ async def main():
             proxy_config["port"],
             proxy_config["secret"],
         ),
-    )
-
-    # Step 4: Start bot
-    await client.start(bot_token=bot_token)
+    ).start(bot_token=bot_token)
 
     # Handle /start command
-    @client.on(events.NewMessage(pattern="/start"))
+    @client.on(events.NewMessage)
     async def handler_start(event):
-        await event.respond("Hello! I'm a simple echo bot.")
+        recived_message = event.raw_text.strip()
+
+        if recived_message == "/start":
+            await event.respond("")
 
     # Handle any text message in private chat
     @client.on(events.NewMessage())
