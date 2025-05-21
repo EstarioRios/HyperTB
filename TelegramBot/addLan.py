@@ -4,15 +4,22 @@ import json
 pathname = os.path.join(os.path.dirname(__file__), "languages.json")
 
 data = [
-    {"lan": "English", "wellcome_text": "Hello Wellcome to our "},
-    {},
+    {
+        "languageName": "English",
+        "language_form": "lang_en",
+        "bad_request": "something get wrong",
+    },
+    {
+        "languageName": "Parsi",
+        "language_form": "lang_fa",
+        "bad_request": "چیزی اشتباه شد",
+    },
+    {
+        "languageName": "Arabic",
+        "language_form": "lang_ar",
+        "bad_request": "",
+    },
 ]
 
-
 with open(pathname, "w", encoding="utf-8") as file:
-    json.dump(
-        ensure_ascii=True,
-        obj=data,
-        indent=4,
-    )
-    
+    json.dump(obj=data, fp=file, ensure_ascii=True, indent=4)
