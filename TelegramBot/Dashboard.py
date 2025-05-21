@@ -134,8 +134,8 @@ async def main():
         Button.inline(name, lan.encode()) for name, lan in languages.items()
     ]
 
+    user_language = {}
 
-    
     # Handle /start command
     @client.on(events.NewMessage)
     async def handler_start(event):
@@ -151,7 +151,19 @@ async def main():
                 buttons=select_langauges_buttons,
             )
 
-            user_language = {event.sender_id: "lang_en"}
+    async def text_loader(event, text_key):
+        languages_file_path_path = os.path.join(os.path.dirname(__file__))
+        with open(languages_file_path_path, mode="r", encoding="utf-8") as file:
+            languages_file_data = json.load(file)
+            for language in languages_file_data:
+                if language["language_form"] == user_language[event.sender_id]:
+                    target_text = language["text_key"]
+                    return text_key
+
+    async def language_selector(event, data):
+        user_id = event.data.sender_id
+        user_language = [user_id] = data
+        await event.respond(await text_loader(event, "language_choiced"), buttons=None)
 
     @client.on(events.CallbackQuery)
     async def callback_dispatcher(event):
@@ -159,14 +171,19 @@ async def main():
         data = str(data)
 
         if data.startswith("lang_"):
+            await language_selector(event, data)
+        elif data.startwith(""):
             pass
+        else:
+            await event.respond(await text_loader(event, "bad_request"))
 
     @client.on(events.NewMessage())
     async def handler_echo(event):
         if event.is_private and event.message.text != "/start":
             await event.respond(f"You said: {event.message.text}")
 
-    print("✅ Bot is running with proxy...")
+    # print("✅ Bot is running with proxy...")
+    print("✅ Bot is running...")
     await client.run_until_disconnected()
 
 
