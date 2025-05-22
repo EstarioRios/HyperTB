@@ -3,7 +3,8 @@
         "languageName": "English",
         "language_form": "lang_en",
         "bad_request": "something get wrong",
-        "language_choiced": "Yes my friend!, Now you can use our services"
+        "language_choiced": "Yes my friend!, Now you can use our services",
+        "send_link": "Plaese Send your Link: "
     },
     {
         "languageName": "Parsi",

@@ -4,6 +4,7 @@ from telethon.errors import RPCError
 import asyncio
 from telethon import TelegramClient, events, Button
 from telethon.sessions import StringSession
+from YouTubeScript.YouTubeDownloader import download_youtube_video
 
 
 # def proxy_finder():
@@ -160,10 +161,26 @@ async def main():
                     target_text = language["text_key"]
                     return text_key
 
+    services_buttons = [
+        Button.inline("Download from YouTube", "service_youtube_download"),
+        Button.inline("Download from SoundCloud", "service_soundcloud_download"),
+    ]
+
     async def language_selector(event, data):
         user_id = event.data.sender_id
         user_language = [user_id] = data
-        await event.respond(await text_loader(event, "language_choiced"), buttons=None)
+        await event.respond(
+            await text_loader(event, "language_choiced"), buttons=services_buttons
+        )
+
+    @client.on(events.NewMessage)
+    async def youtube_downloaer(event):
+        data = event.data.decode()
+        await download_youtube_video(data)
+
+    async def recive_link(event, link):
+
+        await event.respond(await text_loader(event, "send_link"))
 
     @client.on(events.CallbackQuery)
     async def callback_dispatcher(event):
