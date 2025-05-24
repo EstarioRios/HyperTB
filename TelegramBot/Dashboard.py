@@ -1,10 +1,12 @@
 import os, re
 import json
+import sys
 from telethon.errors import RPCError
 import asyncio
 from telethon import TelegramClient, events, Button
 from telethon.sessions import StringSession
 from YouTubeScript.YouTubeDownloader import get_youtube_info, download_youtube_video
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
 # def proxy_finder():
