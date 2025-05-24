@@ -3,7 +3,7 @@ from pytube import YouTube
 from pytube import YouTube
 
 
-async def get_youtube_info(url):
+async def get_youtube_info(url, event):
     try:
         # Create a YouTube object
         yt = YouTube(url)
@@ -28,11 +28,11 @@ async def get_youtube_info(url):
 
         # List of available resolutions
         available_resolutions = [stream.resolution for stream in streams]
+        error = None
 
-        # Print results
-        print(f"🎬 Title: {title}")
-        print(f"📦 Size (approx.): {filesize_mb} MB")
-        print(f"📺 Available Resolutions: {available_resolutions}")
-
+        return error, title, filesize_mb, available_resolutions
     except Exception as e:
-        print(f"❌ Error: {e}")
+
+        error = f"❌ Error: {e}"
+        title, filesize_mb, available_resolutions = None
+        return error, title, filesize_mb, available_resolutions
