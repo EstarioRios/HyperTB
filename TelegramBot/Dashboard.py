@@ -4,7 +4,7 @@ from telethon.errors import RPCError
 import asyncio
 from telethon import TelegramClient, events, Button
 from telethon.sessions import StringSession
-from YouTubeScript.YouTubeDownloader import get_youtube_info
+from YouTubeScript.YouTubeDownloader import get_youtube_info, download_youtube_video
 
 
 # def proxy_finder():
@@ -137,12 +137,25 @@ async def main():
 
     user_language = {}
 
+    async def text_loader(event, text_key):
+        languages_file_path = os.path.join(os.path.dirname(__file__), "languages.json")
+        try:
+            with open(languages_file_path, mode="r", encoding="utf-8") as file:
+                languages_file_data = json.load(file)
+                lang_code = user_language.get(event.sender_id, "lang_en")
+                for language in languages_file_data:
+                    if language["language_form"] == lang_code:
+                        return language.get(text_key, f"⚠️ Missing key '{text_key}'")
+            return f"⚠️ Language '{lang_code}' not found"
+        except Exception as e:
+            return f"⚠️ Error loading languages file: {str(e)}"
+
     # Handle /start command
     @client.on(events.NewMessage)
     async def handler_start(event):
         recived_message = event.raw_text.strip()
 
-        user_language = {event.sender_id: "lang_en"}
+        # user_language = {event.sender_id: "lang_en"}
 
         if recived_message == "/start":
             await event.respond(
@@ -152,15 +165,6 @@ async def main():
                 buttons=select_langauges_buttons,
             )
 
-    async def text_loader(event, text_key):
-        languages_file_path = os.path.join(os.path.dirname(__file__), "languages.json")
-
-        with open(languages_file_path, mode="r", encoding="utf-8") as file:
-            languages_file_data = json.load(file)
-            for language in languages_file_data:
-                if language["language_form"] == user_language[event.sender_id]:
-                    return language.get(text_key, "⚠️ Key not found in language")
-
     services_buttons = [
         Button.inline("Download from YouTube", "service_youtube_get_info"),
         Button.inline("Download from SoundCloud", "service_soundcloud_download"),
@@ -168,7 +172,7 @@ async def main():
 
     async def language_selector(event, data):
         user_id = event.data.sender_id
-        user_language = [user_id] = data
+        user_language[user_id] = data
         await event.respond(
             await text_loader(event, "language_choiced"), buttons=services_buttons
         )
@@ -182,10 +186,7 @@ async def main():
 
         link = response.raw_text.strip()
 
-        link = None
-        error, title, filesize_mb, available_resolutions = await get_youtube_info(
-            link, event
-        )
+        error, title, filesize_mb, available_resolutions = await get_youtube_info(link)
 
         if not error:
 
@@ -206,8 +207,40 @@ async def main():
             )
         else:
             await event.respond(
-                f"{str(text_loader(event, "bad_request"))}\n{str(error)} ||| This message is not deppent on language"
+                f"{await text_loader(event, 'bad_request')}\n{str(error)} ||| This message is not deppent on language"
             )
+
+    async def youtube_download(event, link, resolution):
+        try:
+            await event.respond(await text_loader(event, "download_started"))
+            downloaded_video_path = await download_youtube_video(link, resolution)
+            await event.respond(await text_loader(event, "video_downloaded"))
+            await event.respond(
+                message=await text_loader(event, "your_video_is_here"),
+                file=downloaded_video_path,
+            )
+            if os.path.exists(downloaded_video_path):
+                os.remove(downloaded_video_path)
+
+        except:
+            await event.respond(await text_loader(event, "bad_request"))
+
+
+
+
+
+
+
+    async def soundcloud_download(event, link):
+        pass
+
+
+
+
+
+
+
+
 
     @client.on(events.CallbackQuery)
     async def callback_dispatcher(event):
@@ -224,11 +257,14 @@ async def main():
                 match = re.search(r"reso:(.*?)\$\^_link:(.*?)\$\^", data)
                 if match:
 
-                    video_targer_resolution = match.group(1)
+                    video_target_resolution = match.group(1)
                     video_link = match.group(2)
+                    await youtube_download(event, video_link, video_target_resolution)
 
                 else:
                     await event.respond(await text_loader(event, "bad_request"))
+            if data == "service_soundcloud_download":
+                pass
 
         else:
             await event.respond(await text_loader(event, "bad_request"))

@@ -2,18 +2,41 @@
     {
         "languageName": "English",
         "language_form": "lang_en",
-        "bad_request": "something get wrong",
-        "language_choiced": "Yes my friend!, Now you can use our services",
-        "send_link": "Plaese Send your Link: "
+        "bad_request": "⚠️ Something went wrong!",
+        "language_choiced": "✅ Yes my friend! Now you can use our services.",
+        "send_link": "📎 Please send your link:",
+        "video_downloaded": "✅ Video successfully downloaded!",
+        "download_started": "⬇️ Download has started...",
+        "your_video_is_here": "🎉 Yessss!\nYour video is here!"
     },
     {
         "languageName": "Parsi",
         "language_form": "lang_fa",
-        "bad_request": "\u0686\u06cc\u0632\u06cc \u0627\u0634\u062a\u0628\u0627\u0647 \u0634\u062f"
+        "bad_request": "⚠️ مشکلی پیش آمده!",
+        "language_choiced": "✅ آفرین رفیق! حالا می‌تونی از سرویس‌ها استفاده کنی.",
+        "send_link": "📎 لطفاً لینک‌ات رو بفرست:",
+        "video_downloaded": "✅ ویدیو با موفقیت دانلود شد!",
+        "download_started": "⬇️ دانلود شروع شد...",
+        "your_video_is_here": "🎉 آرههه!\nویدیوت اینجاست!"
     },
     {
         "languageName": "Arabic",
         "language_form": "lang_ar",
-        "bad_request": ""
+        "bad_request": "⚠️ حدث خطأ ما!",
+        "language_choiced": "✅ نعم صديقي! يمكنك الآن استخدام خدماتنا.",
+        "send_link": "📎 أرسل الرابط من فضلك:",
+        "video_downloaded": "✅ تم تنزيل الفيديو بنجاح!",
+        "download_started": "⬇️ بدأ التنزيل...",
+        "your_video_is_here": "🎉 نعم!\nها هو الفيديو الخاص بك!"
+    },
+    {
+        "languageName": "Russian",
+        "language_form": "lang_ru",
+        "bad_request": "⚠️ Что-то пошло не так!",
+        "language_choiced": "✅ Да, мой друг! Теперь вы можете пользоваться нашими услугами.",
+        "send_link": "📎 Пожалуйста, отправьте ссылку:",
+        "video_downloaded": "✅ Видео успешно загружено!",
+        "download_started": "⬇️ Загрузка началась...",
+        "your_video_is_here": "🎉 Ура!\nВаше видео здесь!"
     }
 ]

@@ -131,7 +131,7 @@ while True:
     elif q1 == "2":
         print("=================================================")
 
-        token = input("Write the 'Bot Token: '")
+        token = input("Write the 'Bot Token': ")
 
         # Save the API credentials to file
         subBotInfo(token=token)
