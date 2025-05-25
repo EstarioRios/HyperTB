@@ -5,9 +5,9 @@ from telethon.errors import RPCError
 import asyncio
 from telethon import TelegramClient, events, Button
 from telethon.sessions import StringSession
-from YouTubeScript.YouTubeDownloader import get_youtube_info, download_youtube_video
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from YouTubeScript.YouTubeDownloader import get_youtube_info, download_youtube_video
 
 # def proxy_finder():
 #     """
@@ -108,7 +108,9 @@ async def main():
     try:
         with open(bot_info_path, "r", encoding="utf-8") as f:
             deserialized_data = json.load(f)
-            bot_token = deserialized_data["bot_token"]
+            bot_token = deserialized_data["token"]
+            api_id = deserialized_data["api_id"]
+            api_hash = deserialized_data["api_hash"]
     except Exception as e:
         print(f"Error loading bot token: {str(e)}")
         return
@@ -116,15 +118,16 @@ async def main():
     # Step 3: Create TelegramClient with MTProto proxy and bot_token
     client = TelegramClient(
         session=StringSession(),
-        api_id=0,
-        api_hash="",
+        api_id=api_id,
+        api_hash=api_hash,
         # proxy=(
         #     "mtproxy",
         #     proxy_config["hostname"],
         #     proxy_config["port"],
         #     proxy_config["secret"],
         # ),
-    ).start(bot_token=bot_token)
+    )
+    await client.start(bot_token=bot_token)
 
     languages = {
         "🇺🇸 English": "lang_en",
@@ -227,22 +230,8 @@ async def main():
         except:
             await event.respond(await text_loader(event, "bad_request"))
 
-
-
-
-
-
-
     async def soundcloud_download(event, link):
         pass
-
-
-
-
-
-
-
-
 
     @client.on(events.CallbackQuery)
     async def callback_dispatcher(event):

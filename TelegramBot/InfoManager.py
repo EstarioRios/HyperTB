@@ -65,7 +65,7 @@ def addProxy(hostName, port, secret):
         return False
 
 
-def subBotInfo(token):
+def subBotInfo(token, api_id, api_hash):
     """
     Saves bot API credentials to a JSON file.
 
@@ -77,7 +77,7 @@ def subBotInfo(token):
 
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(
-            {"token": token},
+            {"token": token, "api_id": api_id, "api_hash": api_hash},
             f,  # You were missing the file object here
             ensure_ascii=False,
             indent=4,
@@ -95,7 +95,9 @@ def showBotInfo():
         with open(file_path, "r", encoding="utf-8") as f:
             deserialized_data = json.load(f)
             print("Bot Information:")
-            print(f"Bot Token: {deserialized_data["token"]}")
+            print(
+                f"Bot Token: {deserialized_data["token"]}\nBot Api_Id: {deserialized_data["api_id"]}\nBot Api_Hash: {deserialized_data["api_hash"]}"
+            )
 
     except FileNotFoundError:
         print("Error: BotInfo.json file not found!")
@@ -132,9 +134,11 @@ while True:
         print("=================================================")
 
         token = input("Write the 'Bot Token': ")
+        api_id = input("Write the 'Bot Api_Id': ")
+        api_hash = input("Write the 'Bot Api_Hash': ")
 
         # Save the API credentials to file
-        subBotInfo(token=token)
+        subBotInfo(token=token, api_id=api_id, api_hash=api_hash)
 
     # Option 3: View saved bot information
     elif q1 == "3":
