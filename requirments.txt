@@ -5,3 +5,4 @@ PySocks==1.7.1
 pytube==15.0.0
 rsa==4.9.1
 Telethon==1.40.0
+yt-dlp==2025.5.22

@@ -8,6 +8,7 @@ from telethon.sessions import StringSession
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from YouTubeScript.YouTubeDownloader import get_youtube_info, download_youtube_video
+from ..SoundCloudScript.MusicDownloader import download_soundcloud_track
 
 # def proxy_finder():
 #     """
@@ -96,14 +97,7 @@ from YouTubeScript.YouTubeDownloader import get_youtube_info, download_youtube_v
 
 
 async def main():
-    # # Step 1: Find working proxy
-    # proxy_status, proxy_config = proxy_finder()
-
-    # if not proxy_status:
-    #     print("Cannot start bot - no working proxy available!")
-    #     return
-
-    # Step 2: Load bot_token from BotInfo.json
+    # Load bot credentials from BotInfo.json
     bot_info_path = os.path.join(os.path.dirname(__file__), "BotInfo.json")
     try:
         with open(bot_info_path, "r", encoding="utf-8") as f:
@@ -115,161 +109,149 @@ async def main():
         print(f"Error loading bot token: {str(e)}")
         return
 
-    # Step 3: Create TelegramClient with MTProto proxy and bot_token
-    client = TelegramClient(
-        session=StringSession(),
-        api_id=api_id,
-        api_hash=api_hash,
-        # proxy=(
-        #     "mtproxy",
-        #     proxy_config["hostname"],
-        #     proxy_config["port"],
-        #     proxy_config["secret"],
-        # ),
-    )
+    # Create Telegram client
+    client = TelegramClient(StringSession(), api_id, api_hash)
     await client.start(bot_token=bot_token)
 
+    # Define supported languages and language buttons
     languages = {
         "🇺🇸 English": "lang_en",
         "🇸🇦 Arabic": "lang_ar",
         "🇮🇷 Persian": "lang_fa",
         "🇷🇺 Russian": "lang_ru",
     }
-
-    select_langauges_buttons = [
-        Button.inline(name, lan.encode()) for name, lan in languages.items()
+    select_languages_buttons = [
+        Button.inline(name, lang.encode()) for name, lang in languages.items()
     ]
 
+    # Store user-selected languages
     user_language = {}
 
+    # Load translated text based on selected language
     async def text_loader(event, text_key):
-        languages_file_path = os.path.join(os.path.dirname(__file__), "languages.json")
         try:
-            with open(languages_file_path, mode="r", encoding="utf-8") as file:
+            with open(
+                os.path.join(os.path.dirname(__file__), "languages.json"),
+                mode="r",
+                encoding="utf-8",
+            ) as file:
                 languages_file_data = json.load(file)
                 lang_code = user_language.get(event.sender_id, "lang_en")
-                for language in languages_file_data:
-                    if language["language_form"] == lang_code:
-                        return language.get(text_key, f"⚠️ Missing key '{text_key}'")
-            return f"⚠️ Language '{lang_code}' not found"
+                for lang in languages_file_data:
+                    if lang["language_form"] == lang_code:
+                        return lang.get(text_key, f"⚠️ Missing key '{text_key}'")
+                return f"⚠️ Language '{lang_code}' not found"
         except Exception as e:
             return f"⚠️ Error loading languages file: {str(e)}"
 
     # Handle /start command
-    @client.on(events.NewMessage)
-    async def handler_start(event):
-        recived_message = event.raw_text.strip()
+    @client.on(events.NewMessage(pattern="/start"))
+    async def start_handler(event):
+        await event.respond(
+            "👋 Welcome to HyperTB!\n\nWe're happy to see you here 😊\n🌐 Please choose your language to begin:",
+            buttons=select_languages_buttons,
+        )
 
-        # user_language = {event.sender_id: "lang_en"}
-
-        if recived_message == "/start":
-            await event.respond(
-                "👋 Welcome to HyperTB!\n\n"
-                "We're happy to see you here 😊\n"
-                "🌐 Please choose your language to begin:",
-                buttons=select_langauges_buttons,
-            )
-
+    # Define service buttons
     services_buttons = [
-        Button.inline("Download from YouTube", "service_youtube_get_info"),
-        Button.inline("Download from SoundCloud", "service_soundcloud_download"),
+        Button.inline("Download from YouTube", b"service_youtube_get_info"),
+        Button.inline("Download from SoundCloud", b"service_soundcloud_download"),
     ]
 
+    # Handle language selection
     async def language_selector(event, data):
-        user_id = event.data.sender_id
+        user_id = event.sender_id
         user_language[user_id] = data
         await event.respond(
             await text_loader(event, "language_choiced"), buttons=services_buttons
         )
 
+    # Handle YouTube video info fetch
     async def youtube_get_info(event):
         await event.respond(await text_loader(event, "send_link"))
-
-        response = await client.wait_event(
+        link_event = await client.wait_event(
             events.NewMessage(func=lambda e: e.sender_id == event.sender_id)
         )
+        link = link_event.raw_text.strip()
 
-        link = response.raw_text.strip()
-
-        error, title, filesize_mb, available_resolutions = await get_youtube_info(link)
+        error, title, filesize_mb, resolutions = await get_youtube_info(link)
 
         if not error:
-
-            resolutions_buttons = [
-                (
-                    Button.inline(
-                        str(res),
-                        f"service_video_download_$^reso:{str(available_resolutions)}$^_link:{link}$^",
-                    )
+            buttons = [
+                Button.inline(
+                    res, f"service_video_download_$^reso:{res}$^_link:{link}$^".encode()
                 )
-                for res in available_resolutions
+                for res in resolutions
             ]
             await event.respond(
-                f"🎬 Title: {title}\n"
-                f"📦 Approx. Size (Best Quality): {filesize_mb} MB\n"
-                f"📺 Available Resolutions:",
-                buttons=resolutions_buttons,
+                f"🎬 Title: {title}\n📦 Approx. Size (Best Quality): {filesize_mb} MB\n📺 Available Resolutions:",
+                buttons=buttons,
             )
         else:
-            await event.respond(
-                f"{await text_loader(event, 'bad_request')}\n{str(error)} ||| This message is not deppent on language"
-            )
+            await event.respond(f"{await text_loader(event, 'bad_request')}\n{error}")
 
+    # Handle YouTube video download
     async def youtube_download(event, link, resolution):
         try:
             await event.respond(await text_loader(event, "download_started"))
-            downloaded_video_path = await download_youtube_video(link, resolution)
+            video_path = await download_youtube_video(link, resolution)
             await event.respond(await text_loader(event, "video_downloaded"))
             await event.respond(
-                message=await text_loader(event, "your_video_is_here"),
-                file=downloaded_video_path,
+                message=await text_loader(event, "your_video_is_here"), file=video_path
             )
-            if os.path.exists(downloaded_video_path):
-                os.remove(downloaded_video_path)
-
+            if os.path.exists(video_path):
+                os.remove(video_path)
         except:
             await event.respond(await text_loader(event, "bad_request"))
 
-    async def soundcloud_download(event, link):
-        pass
+    # Handle SoundCloud track download
+    async def soundcloud_download(event):
+        await event.respond(await text_loader(event, "send_link"))
+        link_event = await client.wait_event(
+            events.NewMessage(func=lambda e: e.sender_id == event.sender_id)
+        )
+        link = link_event.raw_text.strip()
 
+        error, file_path = await download_soundcloud_track(url=link)
+
+        if not error:
+            await event.respond(
+                await text_loader(event, "music_downloaded"), file=file_path
+            )
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        else:
+            await event.respond(await text_loader(event, "bad_request"))
+
+    # Handle all callback queries (inline button presses)
     @client.on(events.CallbackQuery)
-    async def callback_dispatcher(event):
+    async def callback_handler(event):
         data = event.data.decode()
-        data = str(data)
 
         if data.startswith("lang_"):
             await language_selector(event, data)
-        elif data.startswith("service_"):
-            if data == "service_youtube_get_info":
-                await youtube_get_info(event)
-            if data.startswith("service_video_download_"):
-                data = str(data)
-                match = re.search(r"reso:(.*?)\$\^_link:(.*?)\$\^", data)
-                if match:
 
-                    video_target_resolution = match.group(1)
-                    video_link = match.group(2)
-                    await youtube_download(event, video_link, video_target_resolution)
+        elif data == "service_youtube_get_info":
+            await youtube_get_info(event)
 
-                else:
-                    await event.respond(await text_loader(event, "bad_request"))
-            if data == "service_soundcloud_download":
-                pass
+        elif data.startswith("service_video_download_"):
+            match = re.search(r"reso:(.*?)\$\^_link:(.*?)\$\^", data)
+            if match:
+                reso = match.group(1)
+                link = match.group(2)
+                await youtube_download(event, link, reso)
+            else:
+                await event.respond(await text_loader(event, "bad_request"))
+
+        elif data == "service_soundcloud_download":
+            await soundcloud_download(event)
 
         else:
             await event.respond(await text_loader(event, "bad_request"))
 
-    @client.on(events.NewMessage())
-    async def handler_echo(event):
-        if event.is_private and event.message.text != "/start":
-            await event.respond(f"You said: {event.message.text}")
-
-    # print("✅ Bot is running with proxy...")
     print("✅ Bot is running...")
     await client.run_until_disconnected()
 
 
-# Entry point
 if __name__ == "__main__":
     asyncio.run(main())
