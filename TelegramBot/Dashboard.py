@@ -179,7 +179,8 @@ async def main():
         if not error:
             buttons = [
                 Button.inline(
-                    res, f"service_video_download_$^reso:{res}$^_link:{link}$^".encode()
+                    res,
+                    f"service_video_download_$^reso:{res}$^_link:{link}$^_size_mb:{filesize_mb}$^".encode(),
                 )
                 for res in resolutions
             ]
@@ -191,9 +192,16 @@ async def main():
             await event.respond(f"{await text_loader(event, 'bad_request')}\n{error}")
 
     # Handle YouTube video download
-    async def youtube_download(event, link, resolution):
+    async def youtube_download(event, link, resolution, size_mb):
         try:
+            donwload_list_path = os.path.join(
+                os.path.dirname("../Download/"), "download_list.json"
+            )
             await event.respond(await text_loader(event, "download_started"))
+            with open(donwload_list_path, "r", encoding="utf-8") as file:
+                data = json.load(file)
+                data = list(data).append(size_mb)
+
             video_path = await download_youtube_video(link, resolution)
             await event.respond(await text_loader(event, "video_downloaded"))
             await event.respond(
@@ -201,6 +209,10 @@ async def main():
             )
             if os.path.exists(video_path):
                 os.remove(video_path)
+
+            with open(donwload_list_path, "r", encoding="utf-8") as file:
+                data = json.load(file)
+                data = list(data).remove(size_mb)
         except:
             await event.respond(await text_loader(event, "bad_request"))
 
@@ -239,7 +251,8 @@ async def main():
             if match:
                 reso = match.group(1)
                 link = match.group(2)
-                await youtube_download(event, link, reso)
+                size_mb = match.group(3)
+                await youtube_download(event, link, reso, size_mb)
             else:
                 await event.respond(await text_loader(event, "bad_request"))
 

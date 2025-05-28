@@ -1,17 +1,25 @@
+# YouTubeDownloader.py
+
 import os
 from pytube import YouTube
-from pytube import YouTube
+from ..TelegramBot.optimation import smart_download
 
 
 async def get_youtube_info(url):
+    """
+    Retrieves basic information about a YouTube video including:
+    - Title
+    - Approximate size (MB)
+    - Available resolutions
+    """
     try:
-        # Create a YouTube object
+        # Create a YouTube object from URL
         yt = YouTube(url)
 
         # Get video title
         title = yt.title
 
-        # Get all progressive mp4 streams (video + audio)
+        # Get progressive (video+audio) mp4 streams and sort by resolution descending
         streams = (
             yt.streams.filter(progressive=True, file_extension="mp4")
             .order_by("resolution")
@@ -19,51 +27,70 @@ async def get_youtube_info(url):
         )
 
         if not streams:
-            error = "⚠️ No downloadable streams found."
+            return "⚠️ No downloadable streams found.", None, None, None
 
-        # Get the highest resolution stream to calculate approximate size
+        # Get the top stream for size estimation
         best_stream = streams[0]
         filesize_bytes = best_stream.filesize or 0
         filesize_mb = round(filesize_bytes / 1024 / 1024, 2)
 
-        # List of available resolutions
+        # Extract available resolution list
         available_resolutions = [stream.resolution for stream in streams]
-        error = None
 
-        return error, title, filesize_mb, available_resolutions
+        return None, title, filesize_mb, available_resolutions
+
     except Exception as e:
-
-        error = f"❌ Error: {e}"
-        title, filesize_mb, available_resolutions = None
-        return error, title, filesize_mb, available_resolutions
+        return f"❌ Error: {e}", None, None, None
 
 
-async def download_youtube_video(link, resolution):
+async def download_youtube_video(link, resolution, user_id):
+    """
+    Downloads a YouTube video in the specified resolution,
+    but only if the total folder size permits.
+    Otherwise, queues the download request.
+
+    Args:
+        link (str): YouTube video URL
+        resolution (str): Desired resolution (e.g., '720p')
+        user_id (int): Telegram user ID of the requester
+
+    Returns:
+        tuple: (status, message, downloaded_path or None)
+    """
     try:
-        # Create target download directory: one level above current → /Download/
-        parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        download_dir = os.path.join(parent_dir, "Download")
-        os.makedirs(download_dir, exist_ok=True)  # Create folder if not exists
-
-        # Load video
+        # Create YouTube object
         yt = YouTube(link)
 
-        # Filter streams by desired resolution and file format (usually mp4)
+        # Get the stream that matches the desired resolution
         stream = yt.streams.filter(
             progressive=True, file_extension="mp4", res=resolution
         ).first()
 
         if stream is None:
-            raise ValueError(
-                f"No video found at {resolution} resolution for this link."
-            )
+            return "error", f"No video found at {resolution} resolution.", None
 
-        # Download video to the download directory
+        # Estimate video size
+        file_size_mb = round((stream.filesize or 0) / 1024 / 1024, 2)
+
+        # Call the smart_download function to decide whether to download now or later
+        decision = smart_download(
+            down_link=link, size_mb=file_size_mb, user_id=user_id, resolution=resolution
+        )
+
+        if decision["status"] == "queued":
+            # Video added to queue; no download now
+            return "queued", decision["message"], None
+
+        # Create download directory: /Download
+        parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        download_dir = os.path.join(parent_dir, "Download")
+        os.makedirs(download_dir, exist_ok=True)
+
+        # Download the video file
         downloaded_path = stream.download(output_path=download_dir)
+        absolute_path = os.path.abspath(downloaded_path)
 
-        # Return absolute path using os
-        downloaded_video_path = os.path.abspath(downloaded_path)
-        return downloaded_video_path
+        return "downloaded", "✅ Download completed successfully.", absolute_path
 
     except Exception as e:
-        return None
+        return "error", f"❌ Error during download: {e}", None
