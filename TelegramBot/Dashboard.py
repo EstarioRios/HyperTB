@@ -107,7 +107,6 @@ async def main():
             api_hash = deserialized_data["api_hash"]
     except Exception as e:
         print(f"Error loading bot token: {str(e)}")
-        return
 
     # Create Telegram client
     client = TelegramClient(StringSession(), api_id, api_hash)
@@ -194,25 +193,32 @@ async def main():
     # Handle YouTube video download
     async def youtube_download(event, link, resolution, size_mb):
         try:
-            donwload_list_path = os.path.join(
-                os.path.dirname("../Download/"), "download_list.json"
+            donwload_list_path = os.path.abspath(
+                os.path.join("Download", "download_list.json")
             )
             await event.respond(await text_loader(event, "download_started"))
             with open(donwload_list_path, "r", encoding="utf-8") as file:
                 data = json.load(file)
-                data = list(data).append(size_mb)
+                data = list(data)
+                data = data.append(size_mb)
 
-            video_path = await download_youtube_video(link, resolution)
-            await event.respond(await text_loader(event, "video_downloaded"))
-            await event.respond(
-                message=await text_loader(event, "your_video_is_here"), file=video_path
-            )
-            if os.path.exists(video_path):
-                os.remove(video_path)
+                user_id = event.sender_id
 
-            with open(donwload_list_path, "r", encoding="utf-8") as file:
-                data = json.load(file)
-                data = list(data).remove(size_mb)
+            error, video_path = await download_youtube_video(link, resolution, user_id)
+            if not error:
+                await event.respond(await text_loader(event, "video_downloaded"))
+                await event.respond(
+                    message=await text_loader(event, "your_video_is_here"),
+                    file=video_path,
+                )
+                if os.path.exists(video_path):
+                    os.remove(video_path)
+
+                with open(donwload_list_path, "r", encoding="utf-8") as file:
+                    data = json.load(file)
+                    data = list(data).remove(size_mb)
+            else:
+                await event.respond(await text_loader(event, "wait_to_download"))
         except:
             await event.respond(await text_loader(event, "bad_request"))
 

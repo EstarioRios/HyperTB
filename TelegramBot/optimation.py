@@ -81,16 +81,16 @@ def smart_download(down_link, size_mb, user_id, resolution, file_type):
             ) as file:
                 data = json.load(file)
 
-            queue_entry = {
-                "type": str(file_type),
-                "link": down_link,
-                "size_mb": size_mb,
-                "user_id": user_id,
-                "resolution": resolution,
-                "dp_number": max([item["dp_number"] for item in data], default=0) + 1,
-            }
+        queue_entry = {
+            "type": str(file_type),
+            "link": down_link,
+            "size_mb": size_mb,
+            "user_id": user_id,
+            "resolution": resolution,
+            "dp_number": max([item["dp_number"] for item in data], default=0) + 1,
+        }
 
-            data.append(queue_entry)
+        data.append(queue_entry)
 
         with open(download_list_file_path, mode="w", encoding="utf-8") as file:
             json.dump(data, file, ensure_ascii=False, indent=4)

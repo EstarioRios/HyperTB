@@ -8,7 +8,8 @@
         "download_started": "⬇️ Download has started...",
         "video_downloaded": "✅ Video successfully downloaded!",
         "music_downloaded": "✅ Music successfully downloaded!",
-        "your_video_is_here": "🎉 Yessss!\nYour video is here!"
+        "your_video_is_here": "🎉 Yessss!\nYour video is here!",
+        "wait_to_download": "Wait your file will download soon"
     },
     {
         "languageName": "Parsi",

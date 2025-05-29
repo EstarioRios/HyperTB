@@ -27,7 +27,7 @@ async def get_youtube_info(url):
         )
 
         if not streams:
-            return "⚠️ No downloadable streams found.", None, None, None
+            return "not_found", None, None, None
 
         # Get the top stream for size estimation
         best_stream = streams[0]
@@ -74,23 +74,28 @@ async def download_youtube_video(link, resolution, user_id):
 
         # Call the smart_download function to decide whether to download now or later
         decision = smart_download(
-            down_link=link, size_mb=file_size_mb, user_id=user_id, resolution=resolution
+            down_link=link,
+            size_mb=file_size_mb,
+            user_id=user_id,
+            resolution=resolution,
+            file_type="video",
         )
 
-        if decision["status"] == "queued":
+        if decision == False:
             # Video added to queue; no download now
-            return "queued", decision["message"], None
+            return "wait_to_download", None
+        else:
 
-        # Create download directory: /Download
-        parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        download_dir = os.path.join(parent_dir, "Download")
-        os.makedirs(download_dir, exist_ok=True)
+            # Create download directory: /Download
+            parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            download_dir = os.path.join(parent_dir, "Download")
+            os.makedirs(download_dir, exist_ok=True)
 
-        # Download the video file
-        downloaded_path = stream.download(output_path=download_dir)
-        absolute_path = os.path.abspath(downloaded_path)
+            # Download the video file
+            downloaded_path = stream.download(output_path=download_dir)
+            absolute_path = os.path.abspath(downloaded_path)
 
-        return "downloaded", "✅ Download completed successfully.", absolute_path
+            return None, absolute_path
 
     except Exception as e:
-        return "error", f"❌ Error during download: {e}", None
+        return "error", None
