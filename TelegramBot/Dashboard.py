@@ -230,7 +230,9 @@ async def main():
         )
         link = link_event.raw_text.strip()
 
-        error, file_path = await download_soundcloud_track(url=link)
+        error, file_path = await download_soundcloud_track(
+            url=link, user_id=event.sender_id
+        )
 
         if not error:
             await event.respond(
@@ -238,6 +240,7 @@ async def main():
             )
             if os.path.exists(file_path):
                 os.remove(file_path)
+            
         else:
             await event.respond(await text_loader(event, "bad_request"))
 
