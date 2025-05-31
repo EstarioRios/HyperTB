@@ -129,6 +129,8 @@ async def donwload_status_checker():
                     pass
                 else:
                     for e in later_down_data:
+
+                        later_down_data = list(later_down_data)
                         file_type = e["type"]
                         file_link = e["link"]
                         file_resolution = e["resolution"]
@@ -141,5 +143,34 @@ async def donwload_status_checker():
                                 resolution=file_resolution,
                                 user_id=user_id,
                             )
+
+                            later_down_data.remove(e)
+
                         if file_type == "music":
                             await download_soundcloud_track(url=file_link)
+                            later_down_data.remove(e)
+
+
+def remove_from_now_down_list(item_down_link, item_resolution, user_id):
+    now_down_list_file_path = os.path.abspath(
+        os.path.join("Download", "download_list.jcon")
+    )
+
+    if os.path.exists(now_down_list_file_path):
+
+        with open(now_down_list_file_path, mode="r", encoding="utf-8") as file:
+            data = json.load(file)
+            for item in data:
+                if (item["link"] == item_down_link) and (
+                    item["user_id"] == user_id,
+                    (item["resolution"] == item_resolution),
+                ):
+                    data = list(data)
+                    data.remove(item)
+
+    else:
+
+        with open(now_down_list_file_path, mode="w", encoding="utf-8") as file:
+
+            data = []
+            json.dump(data, file, ensure_ascii=False, indent=4)
